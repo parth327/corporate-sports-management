@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#07060B" />
+    <meta
+      name="description"
+      content="Corporate Sports Events Management — a demo portal for running company-wide sports and cultural seasons. Fixtures, the Colour League standings, the Cultural Fest, registration and highlights for the 2026–27 season."
+    />
+    <meta name="robots" content="noindex" />
+
+    <title>Corporate Sports Events Management</title>
+
+    <link rel="icon" href="/brand/favicon.svg" type="image/svg+xml" />
+
+    <!-- Sets data-theme before first paint so there is no flash of the wrong
+         theme. Mirrors the fallback logic in src/hooks/useTheme.tsx. -->
+    <script>
+      (function () {
+        try {
+          var stored = localStorage.getItem('csem-theme');
+          var theme = stored === 'light' || stored === 'dark' ? stored : 'dark';
+          document.documentElement.setAttribute('data-theme', theme);
+        } catch (e) {
+          document.documentElement.setAttribute('data-theme', 'dark');
+        }
+      })();
+    </script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- Loaded without blocking first paint: text renders in the fallback face and swaps to DM Sans when it arrives. -->
+    <link
+      rel="preload"
+      as="style"
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300..1000;1,9..40,300..1000&display=swap"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300..1000;1,9..40,300..1000&display=swap"
+      media="print"
+      onload="this.media='all'"
+    />
+    <noscript>
+      <link
+        rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300..1000;1,9..40,300..1000&display=swap"
+      />
+    </noscript>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

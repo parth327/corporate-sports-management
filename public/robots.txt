@@ -1,0 +1,3 @@
+# Internal events portal: kept out of search, matching the noindex meta tag in index.html.
+User-agent: *
+Disallow: /

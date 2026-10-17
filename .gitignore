@@ -1,0 +1,17 @@
+node_modules
+dist
+dist-ssr
+.vite
+*.local
+.DS_Store
+npm-debug.log*
+
+# Local configuration — API base URL, auth scheme, mock switch.
+# `.env.example` is committed; the real one is not.
+.env
+.env.*
+!.env.example
+
+# Screenshots written by scripts/check-runtime.mjs --shots
+/shots
+*.tsbuildinfo

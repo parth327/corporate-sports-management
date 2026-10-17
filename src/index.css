@@ -1,0 +1,446 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: dark;
+    --nav-h: 76px;
+
+    /* Dark theme (default). `fg` is the "ink-900 tuple" for whatever sits on
+       top of `surface`; `surface`/`surface-raised` are the old ink-900/ink-800.
+       Values are unitless R G B triples so Tailwind's <alpha-value> can apply
+       opacity — see the `fg`/`surface` tokens in tailwind.config.js. */
+    --fg-rgb: 255 255 255;
+    --surface-rgb: 26 24 38; /* ink-900 */
+    --surface-raised-rgb: 35 33 48; /* ink-800 */
+
+    /* Accent text, dark default — matches the -400 tier already used
+       throughout for eyebrow labels and inline links. */
+    --accent-magenta-rgb: 224 100 174; /* one step past magenta-400, which measured 4.45:1 on raised panels */
+    --accent-azure-rgb: 74 150 209; /* azure-400 */
+    --accent-solar-rgb: 255 214 51; /* solar-400 */
+    --accent-phthalo-rgb: 34 188 138; /* phthalo-400 */
+
+    --scrollbar-track: #1a1826;
+    --scrollbar-thumb: #4a4559;
+    --selection-bg: rgba(199, 45, 134, 0.4);
+    --selection-fg: #ffffff;
+  }
+
+  /* Light theme. Same warm-shifted logic as the dark palette: a pure #FFFFFF
+     surface makes the brand magenta/azure/solar read harsh, so `surface` sits
+     one step off white, and `fg` is ink-900 rather than pure black so body
+     copy doesn't vibrate against it at high opacity. */
+  :root[data-theme='light'] {
+    color-scheme: light;
+    --fg-rgb: 26 24 38; /* ink-900, reused as light-mode text */
+    --surface-rgb: 248 247 250;
+    --surface-raised-rgb: 255 255 255;
+
+    /* Accent text, light override — stepped down to the tier that clears
+       4.5:1 on the light surface (computed against #F8F7FA):
+       magenta-600 6.78:1, azure-600 6.66:1, phthalo-700 6.95:1. Solar has no
+       documented tier dark enough (solar-700 only reaches 3.27:1), so this
+       is one step past it on the same ramp, at 5.50:1. */
+    --accent-magenta-rgb: 160 31 107; /* magenta-600 */
+    --accent-azure-rgb: 26 91 146; /* azure-600 */
+    --accent-solar-rgb: 122 98 0; /* solar-800 (not in the palette scale) */
+    --accent-phthalo-rgb: 0 98 68; /* phthalo-700 */
+
+    --scrollbar-track: #eeecf2;
+    --scrollbar-thumb: #c7c2d1;
+    --selection-bg: rgba(199, 45, 134, 0.22);
+    --selection-fg: #1a1826;
+  }
+
+  * {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    /* The one anchor offset, read by native jumps and by Lenis alike. A second
+       scroll-margin on sections used to stack on top of it and land every jump
+       a nav-height short. */
+    scroll-padding-top: calc(var(--nav-h) + 16px);
+  }
+
+  /* Lenis animates the position itself; letting CSS smooth it too would chase its own tail. */
+  html.lenis {
+    scroll-behavior: auto;
+  }
+
+  /* 4K and ultrawide: the public site's rem-based type and spacing grow with the screen.
+     Scoped with :has() so the console keeps its tuned density, and pure CSS so there is no shift after load. */
+  @media (min-width: 1920px) {
+    html:has(#site-root) {
+      font-size: 17px;
+    }
+  }
+  @media (min-width: 2560px) {
+    html:has(#site-root) {
+      font-size: 19px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+  }
+
+  /* The public site is a night stadium in both themes; say so on the body too, so nothing (contrast tools included) sees a light page behind it. */
+  body:has(#site-root) {
+    background-color: #05040a;
+  }
+
+  body {
+    @apply bg-surface font-sans text-fg/86 antialiased transition-colors duration-300;
+    margin: 0;
+    overflow-x: hidden;
+    font-size: 16px;
+    line-height: 1.6;
+    /* Opens up DM Sans a touch at small sizes, where the console lives. */
+    letter-spacing: 0.005em;
+  }
+
+  /* Stops mobile browsers inflating text after a rotation. */
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
+  /* Touch screens. iOS Safari zooms the whole page when a focused field is under 16px, which
+     throws the layout sideways on every form; fields on coarse pointers are therefore 16px. */
+  @media (pointer: coarse) {
+    input:not([type='checkbox']):not([type='radio']):not([type='range']),
+    select,
+    textarea {
+      font-size: 16px;
+    }
+  }
+
+  /* Notched phones in landscape: keep content out from under the sensor housing.
+     The console pads the body; the public site pads its own `.shell` (below) because its
+     header is fixed and would otherwise ignore body padding. */
+  body:not(:has(#site-root)) {
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+
+  /* Sections take focus after an in-page jump so keyboard and screen-reader users land with the scroll. */
+  section[tabindex='-1']:focus {
+    outline: none;
+  }
+
+  ::selection {
+    background-color: var(--selection-bg);
+    color: var(--selection-fg);
+  }
+
+  :focus-visible {
+    outline: 2px solid theme('colors.solar.400');
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
+
+  @media (pointer: fine) {
+    ::-webkit-scrollbar {
+      width: 10px;
+      height: 10px;
+    }
+    ::-webkit-scrollbar-track {
+      background: var(--scrollbar-track);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: var(--scrollbar-thumb);
+      border-radius: 999px;
+      border: 3px solid var(--scrollbar-track);
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #c72d86;
+    }
+  }
+
+  /* Firefox. */
+  * {
+    scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+    scrollbar-width: thin;
+  }
+}
+
+@layer components {
+  .glass {
+    @apply border border-fg/16 bg-fg/[0.055] backdrop-blur-xl;
+  }
+
+  .glass-strong {
+    @apply border border-fg/16 bg-surface-raised/85 backdrop-blur-2xl;
+  }
+
+  /* Light theme on the public site: the stadium behind stays night-dark, so any panel that
+     switches to dark ink has to be close to opaque, or its text lands on the dark stadium. */
+  :root[data-theme='light'] #site-root :is(.glass, .glass-strong, [class*='bg-surface-raised/'], [class*='bg-surface/']) {
+    background-color: rgb(var(--surface-raised-rgb) / 0.95);
+  }
+
+  /* Micro-label. DM Sans, uppercase, wide tracking — the corporate site's own
+     voice, shrunk down to a data label. */
+  .hud-label {
+    @apply font-mono text-[11.5px] uppercase tracking-hud text-fg/68;
+  }
+
+  /* Lift on hover. Used by cards and list rows that lead somewhere, so a
+     pointer user can tell what is interactive before clicking it. */
+  .lift {
+    @apply transition-[transform,background-color,border-color,box-shadow] duration-200 ease-out;
+  }
+  .lift:hover {
+    @apply -translate-y-0.5 border-fg/26 bg-fg/[0.085];
+  }
+
+  /* Inline link. Every email, phone and cross-reference in the console uses
+     this, so they are all recognisably the same affordance. */
+  /* `color`/`text-decoration-color` set directly rather than through
+     `@apply text-accent-azure`: Tailwind's `@apply` resolves a custom-property
+     -backed utility (see the `accent` tokens in tailwind.config.js) only if
+     that utility is also matched from a scanned .tsx/.jsx file, and resolving
+     it purely from inside this stylesheet fails the build — better to not
+     depend on that ordering here. */
+  .link {
+    @apply rounded-sm font-medium underline underline-offset-[3px] transition-colors duration-150 hover:text-azure-500;
+    color: rgb(var(--accent-azure-rgb));
+    text-decoration-color: rgb(var(--accent-azure-rgb) / 0.4);
+  }
+
+  .shell {
+    @apply mx-auto w-full max-w-shell px-5 sm:px-8 lg:px-12 3xl:max-w-[1560px] 4xl:max-w-[1900px];
+  }
+
+  /* Stand-in for the WebGL stadium while it loads, and for good where WebGL is unavailable:
+     a night sky over a lit bowl, drawn with gradients alone. */
+  .stadium-standin {
+    background:
+      radial-gradient(60% 34% at 66% 78%, rgba(255, 236, 200, 0.16), transparent 70%),
+      radial-gradient(46% 22% at 66% 80%, rgba(18, 120, 60, 0.35), transparent 72%),
+      radial-gradient(70% 46% at 66% 82%, rgba(199, 45, 134, 0.16), transparent 70%),
+      radial-gradient(22% 18% at 88% 22%, rgba(255, 230, 190, 0.2), transparent 70%),
+      radial-gradient(22% 18% at 44% 20%, rgba(255, 230, 190, 0.14), transparent 70%),
+      radial-gradient(80% 60% at 20% 10%, rgba(36, 117, 183, 0.18), transparent 70%),
+      linear-gradient(180deg, #05040a 0%, #0d0a18 55%, #140f1f 100%);
+  }
+
+  .display-title {
+    @apply font-display uppercase leading-[0.92] tracking-tightest;
+  }
+
+  /* Primary action carries the brand magenta. Text stays literal white: the
+     button background is always the same saturated magenta regardless of
+     theme, so the label never needs to flip. */
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-full bg-magenta-500 px-7 py-3.5 font-cond text-[15px] uppercase tracking-wider2 text-white transition-colors duration-300 hover:bg-magenta-400;
+  }
+
+  .btn-solar {
+    @apply inline-flex items-center justify-center gap-2 rounded-full bg-solar-500 px-7 py-3.5 font-cond text-[15px] uppercase tracking-wider2 text-ink-900 transition-colors duration-300 hover:bg-solar-400;
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 rounded-full border border-fg/20 px-7 py-3.5 font-cond text-[15px] uppercase tracking-wider2 text-fg/80 transition-colors duration-300 hover:border-fg/50 hover:text-fg;
+  }
+
+  @media (orientation: landscape) and (max-width: 1023px) {
+    body:has(#site-root) .shell {
+      padding-left: max(2rem, env(safe-area-inset-left));
+      padding-right: max(2rem, env(safe-area-inset-right));
+    }
+  }
+
+  /* Shadow at whichever edge of a sideways-scrolling table still has more to reveal, so a cut-off
+     column reads as "scroll me" rather than as a layout bug. The `local` layers cover the
+     shadows once the content reaches that edge. */
+  .scroll-hint-x {
+    background:
+      linear-gradient(to right, rgb(var(--surface-raised-rgb)) 30%, transparent) left center / 28px 100% no-repeat local,
+      linear-gradient(to left, rgb(var(--surface-raised-rgb)) 30%, transparent) right center / 28px 100% no-repeat local,
+      radial-gradient(farthest-side at 0 50%, rgb(var(--fg-rgb) / 0.24), transparent) left center / 12px 100% no-repeat scroll,
+      radial-gradient(farthest-side at 100% 50%, rgb(var(--fg-rgb) / 0.24), transparent) right center / 12px 100% no-repeat scroll;
+  }
+
+  .edge-mask {
+    -webkit-mask-image: linear-gradient(
+      to right,
+      transparent 0%,
+      black 7%,
+      black 93%,
+      transparent 100%
+    );
+    mask-image: linear-gradient(to right, transparent 0%, black 7%, black 93%, transparent 100%);
+  }
+
+  /* ---------------------------------------------------------------- *
+   * Lab: the spatial team builder. Always night — it floats over a
+   * WebGL arena — so it uses literal colours, not the theme tokens.
+   * ---------------------------------------------------------------- */
+
+  /* One fluid scale from a 360px phone to a 2560px screen: each step is a
+     clamp between its phone and 4K sizes, so nothing jumps at a breakpoint. */
+  .tb-root {
+    --tb-fs-micro: clamp(0.625rem, 0.6rem + 0.1vw, 0.8125rem);
+    --tb-fs-small: clamp(0.72rem, 0.68rem + 0.16vw, 0.9375rem);
+    --tb-fs-body: clamp(0.84rem, 0.78rem + 0.22vw, 1.125rem);
+    --tb-fs-title: clamp(1rem, 0.9rem + 0.42vw, 1.5rem);
+    --tb-fs-stat: clamp(1.35rem, 1.05rem + 1.1vw, 2.75rem);
+    --tb-gap: clamp(0.5rem, 0.35rem + 0.5vw, 1.25rem);
+    --tb-chip: 52px;
+    color-scheme: dark;
+  }
+  @media (max-width: 767px) {
+    .tb-root {
+      --tb-chip: 46px;
+    }
+  }
+  body:has(.tb-root) {
+    background-color: #03050b;
+  }
+
+  .tb-fs-micro {
+    font-size: var(--tb-fs-micro);
+    line-height: 1.3;
+  }
+  .tb-fs-small {
+    font-size: var(--tb-fs-small);
+    line-height: 1.35;
+  }
+  .tb-fs-body {
+    font-size: var(--tb-fs-body);
+    line-height: 1.35;
+  }
+  .tb-fs-title {
+    font-size: var(--tb-fs-title);
+    line-height: 1.15;
+  }
+  .tb-fs-stat {
+    font-size: var(--tb-fs-stat);
+    line-height: 1;
+  }
+
+  /* Layered glass: a tinted pane with its own backdrop blur, a light sheen
+     falling from the top-left, a coloured under-glow in the corners, and a
+     hairline highlight on the top edge where light would catch it. */
+  .tb-glass {
+    position: relative;
+    isolation: isolate;
+    background:
+      linear-gradient(160deg, rgba(255, 255, 255, 0.085) 0%, rgba(255, 255, 255, 0.02) 34%, rgba(255, 255, 255, 0) 60%),
+      rgba(7, 11, 24, 0.56);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.12),
+      0 30px 80px -24px rgba(0, 0, 0, 0.8);
+    /* 12px, not more: over a canvas that repaints every frame, Chrome re-blurs the backdrop each frame, and
+       above roughly this radius the blur costs several times as much (85 fps at 22px against 220 at 12px,
+       uncapped, on the integrated GPU this was tuned on). The tint and saturation carry the frost. */
+    -webkit-backdrop-filter: blur(12px) saturate(1.6);
+    backdrop-filter: blur(12px) saturate(1.6);
+  }
+  .tb-glass::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    pointer-events: none;
+    background:
+      radial-gradient(110% 55% at 0% 0%, rgba(74, 150, 209, 0.16), transparent 62%),
+      radial-gradient(90% 45% at 100% 100%, rgba(219, 85, 165, 0.11), transparent 62%);
+  }
+
+  .tb-card {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.065), rgba(255, 255, 255, 0.025));
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.07);
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+  }
+  .tb-card:hover {
+    border-color: rgba(255, 255, 255, 0.2);
+  }
+
+  /* A player's token on the pitch: the role colour as a lit ring round a dark lens. */
+  .tb-chip {
+    width: var(--tb-chip);
+    height: var(--tb-chip);
+    border-radius: 9999px;
+    background: radial-gradient(circle at 50% 35%, #1b2640 0%, #070b18 72%);
+    background: radial-gradient(circle at 50% 35%, color-mix(in srgb, var(--tb-role) 55%, #0b1224) 0%, #070b18 72%);
+    box-shadow:
+      0 0 0 2px var(--tb-role),
+      0 0 18px -2px var(--tb-role),
+      inset 0 0 12px rgba(0, 0, 0, 0.6);
+  }
+
+  .tb-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.22) transparent;
+    overscroll-behavior: contain;
+  }
+  .tb-scroll::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .tb-scroll::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border: 3px solid transparent;
+    background-clip: padding-box;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .gpu {
+    transform: translateZ(0);
+    backface-visibility: hidden;
+  }
+
+  /* Film grain over the WebGL backdrop, so the big gradients never band. */
+  .grain::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.15;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+  }
+
+  .glow-magenta {
+    text-shadow: 0 0 26px rgba(199, 45, 134, 0.55), 0 0 80px rgba(199, 45, 134, 0.25);
+  }
+  .glow-solar {
+    text-shadow: 0 0 24px rgba(255, 203, 0, 0.5), 0 0 76px rgba(255, 203, 0, 0.2);
+  }
+  .glow-azure {
+    text-shadow: 0 0 24px rgba(36, 117, 183, 0.55), 0 0 76px rgba(36, 117, 183, 0.22);
+  }
+
+  .pause-on-hover:hover > * {
+    animation-play-state: paused;
+  }
+}
+
+/* Global motion kill-switch. Framer respects useReducedMotion in JS; this
+   catches the CSS-driven marquees and decorative loops. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
